@@ -1,0 +1,101 @@
+---
+- hosts: localhost
+  gather_facts: no
+  tasks:
+    
+    - name: Check If Docker Is Installed
+      command: docker --version
+      register: docker_valid
+      ignore_errors: yes
+ 
+    - name: Debug Docker Output
+      debug:
+        var: docker_valid
+ 
+    - name: Install Docker pre-requisites
+      yum:
+        name: yum-utils
+        state: latest
+      when: docker_valid.failed
+
+    - name: Configure Yum
+      yum_repository:
+        name: "docker_repo"
+        description: Yum repo for docker
+        baseurl: https://download.docker.com/linux/centos/7/x86_64/stable/
+        gpgcheck: no
+      when: docker_valid.failed
+
+    - name: Install Docker
+      package:
+        name: "docker-ce-20.10.21-3.el7.x86_64"
+        state: present
+      when: docker_valid.failed
+    
+    - name: Install Python
+      package:
+        name: "python3"
+        state: present
+      when: docker_valid.failed
+    
+    - name: Install Docker SDK for Python
+      pip:
+        name: docker
+      when: docker_valid.failed
+    
+    - name: Start Docker Service
+      service:
+        name: "docker"
+        state: started
+      when: docker_valid.failed
+
+    - name: Check Again If Docker Is Installed and Quit If Errors Occur
+      command: docker --version
+      register: docker_valid
+ 
+    - name: Debug Docker Output Again
+      debug:
+        var: docker_valid
+
+    - when: docker_valid.failed
+      block:
+
+        - name: Run Task If Docker is Already Installed
+          debug:
+            msg: "Will run tasks since docker is already installed."
+
+        - name: Download the JDK Binaries
+          get_url:
+            url: https://download.oracle.com/java/18/archive/jdk-18.0.2.1_linux-x64_bin.tar.gz
+            dest: /opt/jdk-18_linux-x64_bin.tar.gz
+
+        - name: Unzip the Downloaded File
+          unarchive:
+            src: /opt/jdk-18_linux-x64_bin.tar.gz
+            dest: /opt
+            remote_src: yes
+
+        - name: Reset Java Link
+          shell: ln -sf /opt/jdk-18.0.2.1/bin/java /etc/alternatives/java
+
+        - name: Obtain Access Permission
+          shell: chmod +x ./gradlew
+
+        - name: Build App From Source
+          shell: ./gradlew build
+
+        - name: Create Container Image
+          docker_image:
+            name: demo-container
+            source: build
+            build:
+              path: ./
+
+        - name: Start Docker Container
+          docker_container:
+            name: yang_assignment
+            recreate: true
+            state: started
+            image: assignment-container
+            ports:
+              - "8080:8080"
