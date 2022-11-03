@@ -1,27 +1,35 @@
-# Read Me First
-The following was discovered as part of building this project:
+# Spring Boot Docker Ansible
 
-* The original package name 'com.yanggao.spring-boot-docker' is invalid and this project uses 'com.yanggao.springbootdocker' instead.
+In this project, you will build a demo Spring Boot application running inside a Docker container, by just simply execute
+ the Ansible script.
+ 
+### Stack
 
-# Getting Started
+- Ansible
+- Docker
+- Java
+- Spring Boot
+- Gradle
 
-### Reference Documentation
-For further reference, please consider the following sections:
+## Getting Started
 
-* [Official Gradle documentation](https://docs.gradle.org)
-* [Spring Boot Gradle Plugin Reference Guide](https://docs.spring.io/spring-boot/docs/2.6.13/gradle-plugin/reference/html/)
-* [Create an OCI image](https://docs.spring.io/spring-boot/docs/2.6.13/gradle-plugin/reference/html/#build-image)
-* [Spring Web](https://docs.spring.io/spring-boot/docs/2.6.13/reference/htmlsingle/#web)
+### Prerequisites
 
-### Guides
-The following guides illustrate how to use some features concretely:
+* CentOS 7.9 with the root permission
+* Ansible latest stable version (The project is tested on Ansible 4.10)
+* Docker and JDK are not mandatory, the Ansible script would install them for you if needed.
 
-* [Building a RESTful Web Service](https://spring.io/guides/gs/rest-service/)
-* [Serving Web Content with Spring MVC](https://spring.io/guides/gs/serving-web-content/)
-* [Building REST services with Spring](https://spring.io/guides/tutorials/rest/)
+### Run
 
-### Additional Links
-These additional references should also help you:
+* Run command 
+```
+sudo ansible-playbook playbook.yml
+```
 
-* [Gradle Build Scans – insights for your project's build](https://scans.gradle.com#gradle)
+* Test dockerized app by passing your name as the parameter, e.g.
+```
+curl http://localhost:8080/Joe
+```
+
+
 

@@ -49,15 +49,17 @@
         state: started
       when: docker_valid.failed
 
-    - name: Check Again If Docker Is Installed and Quit If Errors Occur
+    - name: Check Again If Docker Is Installed
       command: docker --version
       register: docker_valid
+      ignore_errors: yes
  
     - name: Debug Docker Output Again
       debug:
         var: docker_valid
 
-    - when: docker_valid.failed
+    - when: not docker_valid.failed
+     
       block:
 
         - name: Run Task If Docker is Already Installed
@@ -86,7 +88,7 @@
 
         - name: Create Container Image
           docker_image:
-            name: demo-container
+            name: assignment-container
             source: build
             build:
               path: ./
